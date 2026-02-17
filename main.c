@@ -71,7 +71,7 @@ int main(int argc, char *argv[]) {
 						int terminal_height = w.ws_row;
 						int terminal_width = w.ws_col;
 						
-						// if frame is too tall
+						// if frame is too tall resize
 						if (frame_height > terminal_height) {
 							
 							int resized_terminal_width = (int) floor(((float) terminal_height / frame_height) * frame_width);
@@ -83,27 +83,30 @@ int main(int argc, char *argv[]) {
 							av_frame_get_buffer(resized_Frame,32);
 							sws_scale(sws_ctx, (const uint8_t *const *)resized_Frame->data,resized_Frame->linesize,0,terminal_height,resized_Frame->data,resized_Frame->linesize);
 
-							printf("new frame dimensions %dx%d\n", resized_Frame->height, resized_Frame->width);
+							printf("(PASS 1) %dx%d\n",  resized_Frame->width,resized_Frame->height);
 							
 					sws_freeContext(sws_ctx);
 					av_frame_free(&resized_Frame);
 						}
 						
-						if (frame_width > terminal_width) {
-							int resized_terminal_height = (int) floor(((float) terminal_width / frame_width) * frame_height);
-
-							struct SwsContext *sws_ctx = sws_getContext(frame_width,frame_height,frame->format,terminal_width,resized_terminal_height,frame->format,SWS_FAST_BILINEAR, NULL, NULL, NULL);
-							AVFrame *resized_Frame = av_frame_alloc();
-							resized_Frame->format = frame->format;
-							resized_Frame->width = terminal_width;
-							resized_Frame->height = resized_terminal_height;
-							av_frame_get_buffer(resized_Frame,32);
-							sws_scale(sws_ctx, (const uint8_t *const *)resized_Frame->data,resized_Frame->linesize,0,resized_terminal_height,resized_Frame->data,resized_Frame->linesize);
-
-							printf("new frame dimensions %dx%d\n", resized_Frame->height, resized_Frame->width);
-					sws_freeContext(sws_ctx);
-					av_frame_free(&resized_Frame);
-						}
+					// if da frame is too wide then resize
+//						if (frame_width > terminal_width) {
+//							int resized_terminal_height = (int) floor(((float) terminal_width / frame_width) * frame_height);
+//
+//							struct SwsContext *sws_ctx = sws_getContext(frame_width,frame_height,frame->format,terminal_width,resized_terminal_height,frame->format,SWS_FAST_BILINEAR, NULL, NULL, NULL);
+//							AVFrame *resized_Frame = av_frame_alloc();
+//							resized_Frame->format = frame->format;
+//							resized_Frame->width = terminal_width;
+//							resized_Frame->height = resized_terminal_height;
+//							av_frame_get_buffer(resized_Frame,32);
+//							sws_scale(sws_ctx, (const uint8_t *const *)resized_Frame->data,resized_Frame->linesize,0,resized_terminal_height,resized_Frame->data,resized_Frame->linesize);
+//
+//							printf("(PASS 2) %dx%d\n", resized_Frame->height, resized_Frame->width);
+//					sws_freeContext(sws_ctx);
+//					av_frame_free(&resized_Frame);
+//							
+//						
+//						}
 					
 					
 
