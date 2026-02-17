@@ -75,38 +75,61 @@ int main(int argc, char *argv[]) {
 						if (frame_height > terminal_height) {
 							
 							int resized_terminal_width = (int) floor(((float) terminal_height / frame_height) * frame_width);
-							struct SwsContext *sws_ctx = sws_getContext(frame_width,frame_height,frame->format,resized_terminal_width,terminal_height,frame->format,SWS_FAST_BILINEAR, NULL, NULL, NULL);
+							struct SwsContext *sws_ctx = sws_getContext(frame_width,frame_height,frame->format,resized_terminal_width,terminal_height,AV_PIX_FMT_RGB24,SWS_FAST_BILINEAR, NULL, NULL, NULL);
 							AVFrame *resized_Frame = av_frame_alloc();
-							resized_Frame->format = frame->format;
+							resized_Frame->format = AV_PIX_FMT_RGB24;
 							resized_Frame->height = terminal_height;
 							resized_Frame->width = resized_terminal_width;
 							av_frame_get_buffer(resized_Frame,32);
-							sws_scale(sws_ctx, (const uint8_t *const *)resized_Frame->data,resized_Frame->linesize,0,terminal_height,resized_Frame->data,resized_Frame->linesize);
+							sws_scale(sws_ctx, (const uint8_t *const *)frame->data,frame->linesize,0,frame_height,resized_Frame->data,resized_Frame->linesize);
 
+							printf("Decoded format: %s\n", av_get_pix_fmt_name(frame->format));
 							printf("(PASS 1) %dx%d\n",  resized_Frame->width,resized_Frame->height);
 							
-					sws_freeContext(sws_ctx);
-					av_frame_free(&resized_Frame);
+
+							// showtime, image processing
+							
+
+							
+
+							// magically read RGB values or wtvr
+
+								uint8_t *data = resized_Frame->data[0];
+								int linesize = resized_Frame->linesize[0];
+
+								for (int z = 0; z < resized_Frame->height; z++) {
+									uint8_t *row = data + z * linesize;
+									for (int x = 0; x < resized_Frame->width; x++) {
+										uint8_t r = row[x * 3 + 0];
+										uint8_t g = row[x * 3 + 1];
+										uint8_t b = row[x * 3 + 2];
+										printf("\033[48;2;%d;%d;%dm \033[0m",r,g,b);
+								}
+									printf("\n");
+//									printf("\033[H");
+
 						}
 						
+							sws_freeContext(sws_ctx);
+							av_frame_free(&resized_Frame);
 					// if da frame is too wide then resize
-//						if (frame_width > terminal_width) {
-//							int resized_terminal_height = (int) floor(((float) terminal_width / frame_width) * frame_height);
-//
-//							struct SwsContext *sws_ctx = sws_getContext(frame_width,frame_height,frame->format,terminal_width,resized_terminal_height,frame->format,SWS_FAST_BILINEAR, NULL, NULL, NULL);
-//							AVFrame *resized_Frame = av_frame_alloc();
-//							resized_Frame->format = frame->format;
-//							resized_Frame->width = terminal_width;
-//							resized_Frame->height = resized_terminal_height;
-//							av_frame_get_buffer(resized_Frame,32);
-//							sws_scale(sws_ctx, (const uint8_t *const *)resized_Frame->data,resized_Frame->linesize,0,resized_terminal_height,resized_Frame->data,resized_Frame->linesize);
-//
-//							printf("(PASS 2) %dx%d\n", resized_Frame->height, resized_Frame->width);
-//					sws_freeContext(sws_ctx);
-//					av_frame_free(&resized_Frame);
-//							
-//						
-//						}
+	//					if (frame_width > terminal_width) {
+	//						int resized_terminal_height = (int) floor(((float) terminal_width / frame_width) * frame_height);
+
+	//						struct SwsContext *sws_ctx = sws_getContext(frame_width,frame_height,frame->format,terminal_width,resized_terminal_height,frame->format,SWS_FAST_BILINEAR, NULL, NULL, NULL);
+	//						AVFrame *resized_Frame = av_frame_alloc();
+	//						resized_Frame->format = frame->format;
+	//						resized_Frame->width = terminal_width;
+	//						resized_Frame->height = resized_terminal_height;
+	//						av_frame_get_buffer(resized_Frame,32);
+	//						sws_scale(sws_ctx, (const uint8_t *const *)resized_Frame->data,resized_Frame->linesize,0,frame->height,resized_Frame->data,resized_Frame->linesize);
+
+	//						printf("(PASS 2) %dx%d\n", resized_Frame->height, resized_Frame->width);
+	//				sws_freeContext(sws_ctx);
+	//				av_frame_free(&resized_Frame);
+	//						
+	//					
+	//					}
 					
 					
 
@@ -124,4 +147,5 @@ int main(int argc, char *argv[]) {
 	avcodec_free_context(&cdc_ctx);
 	avformat_close_input(&fmt_ctx);
 	return 0;
+}
 }
