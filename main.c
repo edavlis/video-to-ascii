@@ -1,4 +1,6 @@
 #include <libavutil/mem.h> 
+#include <string.h>
+#include <strings.h>
 #include <libswscale/swscale.h>
 #include <libswscale/version.h>
 #include <stdint.h>
@@ -16,45 +18,96 @@
 #include <stdio.h>
 
 int main(int argc, char *argv[]) {
+	
+	// different character sets
+	 char *charset;
+	 char *charset0 = " ";
+	 char *charset1 = "`^\",:;Il!i~+_-?][}(1)(|\\/tfjrxnuvczXYUJCL";
+	 char *charset2 = " `^\",:;Il!i~+_-?][}(1)(|\\/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao#MW&8%B@S";
+	 char *charset3 = " `^\",:;Il!i~+_-?][}(1)(|\\/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao#MW&8%B@S";
+	 char *charset4 = "  `^\",:;Il!i~+_-?][}(1)(|\\/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao#MW&8%B@S";
+	 char *charset5 = "    `^\",:;Il!i~+_-?][}(1)(|\\/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao#MW&8%B@S";
+	 char *charset6 = "         `^\",:;Il!i~+_-?][}(1)(|\\/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao#MW&8%B@S";
+	 char *charset7 = "                   `^\",:;Il!i~+_-?][}(1)(|\\/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao#MW&8%B@S";
+	 char *charset8 = "                                       `^\",:;Il!i~+_-?][}(1)(|\\/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao#MW&8%B@S";
+	 char *charset9 = "                                                                   `^\",:;Il!i~+_-?][}(1)(|\\/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao#MW&8%B@S";
+	 const char chars_array_blank[] = " ";
 
-	struct winsize w;
-	ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
-	int terminal_height = w.ws_row;
-	int terminal_width = w.ws_col;
+	 switch (atoi(argv[2])) {
+		case 0:
+			charset = charset0;
+			break;
+		case 1:
+			charset = charset1;
+			break;
+		case 2:
+			charset = charset2;
+			break;
+		case 3:
+			charset = charset3;
+			break;
+		case 4:
+			charset = charset4;
+			break;
+		case 5:
+			charset = charset5;
+			break;
+		case 6:
+			charset = charset6;
+			break;
+		case 7:
+			charset = charset7;
+			break;
+		case 8:
+			charset = charset8;
+			break;
+		case 9:
+			charset = charset9;
+			break;
+	 }
 
-	AVFormatContext *fmt_ctx = NULL;
-	AVCodecContext *cdc_ctx = NULL;
-	const AVCodec *codec = NULL;
+	// termios stuff
+		struct winsize w;
+		ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
+		int terminal_height = w.ws_row - 1 ;
+		int terminal_width = w.ws_col;
 
-	AVPacket *packet = NULL;
-	AVFrame *frame = NULL;
+	
+	// ffmpeg initialisation stuff
+		AVFormatContext *fmt_ctx = NULL;
+		AVCodecContext *cdc_ctx = NULL;
+		const AVCodec *codec = NULL;
 
-	int video_stream_index;
+		AVPacket *packet = NULL;
+		AVFrame *frame = NULL;
 
-	avformat_open_input(&fmt_ctx, argv[1], NULL, NULL);
-	avformat_find_stream_info(fmt_ctx, NULL);
+		int video_stream_index;
+
+		avformat_open_input(&fmt_ctx, argv[1], NULL, NULL);
+		avformat_find_stream_info(fmt_ctx, NULL);
 
 
-	for (int i = 0; i < fmt_ctx->nb_streams; i++) {
-		if (fmt_ctx->streams[i]->codecpar->codec_type == AVMEDIA_TYPE_VIDEO) {
-			video_stream_index = i;
+		for (int i = 0; i < fmt_ctx->nb_streams; i++) {
+			if (fmt_ctx->streams[i]->codecpar->codec_type == AVMEDIA_TYPE_VIDEO) {
+				video_stream_index = i;
+			}
 		}
-	}
 
-	codec = avcodec_find_decoder(fmt_ctx->streams[video_stream_index]->codecpar->codec_id);
+		codec = avcodec_find_decoder(fmt_ctx->streams[video_stream_index]->codecpar->codec_id);
 
-	cdc_ctx = avcodec_alloc_context3(codec);
-	avcodec_parameters_to_context(cdc_ctx, fmt_ctx->streams[video_stream_index]->codecpar);
+		cdc_ctx = avcodec_alloc_context3(codec);
+		avcodec_parameters_to_context(cdc_ctx, fmt_ctx->streams[video_stream_index]->codecpar);
 
-	avcodec_open2(cdc_ctx, codec, NULL);
+		avcodec_open2(cdc_ctx, codec, NULL);
 
-	packet = av_packet_alloc();
-	frame = av_frame_alloc();
+		packet = av_packet_alloc();
+		frame = av_frame_alloc();
 
-	int frame_width;
-	int frame_height;
+		int frame_width;
+		int frame_height;
 
 
+	// frame  -> ascii
 	while (av_read_frame(fmt_ctx, packet) >= 0) {
 	
 			if (packet->stream_index == video_stream_index) {
@@ -62,14 +115,11 @@ int main(int argc, char *argv[]) {
 					
 					while (avcodec_receive_frame(cdc_ctx, frame ) == 0)  {
 
-					/////////////////////// alll the logic and shit goes HERE nigga!!!!!!
-
 					// resizing to terminal size
-					
 						frame_width = frame->width;
 						frame_height = frame->height;
 						ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
-						int terminal_height = w.ws_row;
+						int terminal_height = w.ws_row - 1;
 						int terminal_width = w.ws_col;
 						
 						// if frame is too tall resize
@@ -86,8 +136,6 @@ int main(int argc, char *argv[]) {
 
 //							printf("Decoded format: %s\n", av_get_pix_fmt_name(frame->format));
 //							printf("(PASS 1) %dx%d\n",  resized_Frame->width,resized_Frame->height);
-							
-
 
 							// magically read RGB values or wtvr
 
@@ -100,7 +148,9 @@ int main(int argc, char *argv[]) {
 										uint8_t r = row[x * 3 + 0];
 										uint8_t g = row[x * 3 + 1];
 										uint8_t b = row[x * 3 + 2];
-										printf("\033[48;2;%d;%d;%dm \033[0m",r,g,b);
+										int average_brightness = (float) (r + g + b) / 3;
+										int character_index =  round((float)((float)average_brightness / 256.0) * (strlen(charset) -1));
+										printf("\033[48;2;%d;%d;%dm%c\033[0m",r,g,b,charset[character_index]);
 								}
 									printf("\n"); // new line of the frame
 
