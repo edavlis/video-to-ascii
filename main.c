@@ -65,6 +65,7 @@ int main(int argc, char *argv[]) {
 					/////////////////////// alll the logic and shit goes HERE nigga!!!!!!
 
 					// resizing to terminal size
+					
 						frame_width = frame->width;
 						frame_height = frame->height;
 						ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
@@ -72,7 +73,7 @@ int main(int argc, char *argv[]) {
 						int terminal_width = w.ws_col;
 						
 						// if frame is too tall resize
-						if (frame_height > terminal_height) {
+						if (frame_height > terminal_height ) {
 							
 							int resized_terminal_width = (int) floor(((float) terminal_height / frame_height) * frame_width);
 							struct SwsContext *sws_ctx = sws_getContext(frame_width,frame_height,frame->format,resized_terminal_width,terminal_height,AV_PIX_FMT_RGB24,SWS_FAST_BILINEAR, NULL, NULL, NULL);
@@ -83,14 +84,10 @@ int main(int argc, char *argv[]) {
 							av_frame_get_buffer(resized_Frame,32);
 							sws_scale(sws_ctx, (const uint8_t *const *)frame->data,frame->linesize,0,frame_height,resized_Frame->data,resized_Frame->linesize);
 
-							printf("Decoded format: %s\n", av_get_pix_fmt_name(frame->format));
-							printf("(PASS 1) %dx%d\n",  resized_Frame->width,resized_Frame->height);
+//							printf("Decoded format: %s\n", av_get_pix_fmt_name(frame->format));
+//							printf("(PASS 1) %dx%d\n",  resized_Frame->width,resized_Frame->height);
 							
 
-							// showtime, image processing
-							
-
-							
 
 							// magically read RGB values or wtvr
 
@@ -105,10 +102,10 @@ int main(int argc, char *argv[]) {
 										uint8_t b = row[x * 3 + 2];
 										printf("\033[48;2;%d;%d;%dm \033[0m",r,g,b);
 								}
-									printf("\n");
-//									printf("\033[H");
+									printf("\n"); // new line of the frame
 
 						}
+									printf("\033[H"); // new frame
 						
 							sws_freeContext(sws_ctx);
 							av_frame_free(&resized_Frame);
@@ -117,12 +114,12 @@ int main(int argc, char *argv[]) {
 
 				
 			}
-	av_packet_unref(packet);
 	}
+	av_packet_unref(packet);
+}
 	av_frame_free(&frame);
 	av_packet_free(&packet);
 	avcodec_free_context(&cdc_ctx);
 	avformat_close_input(&fmt_ctx);
 	return 0;
-}
 }
