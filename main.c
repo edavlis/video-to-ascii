@@ -112,29 +112,6 @@ int main(int argc, char *argv[]) {
 						
 							sws_freeContext(sws_ctx);
 							av_frame_free(&resized_Frame);
-					// if da frame is too wide then resize
-	//					if (frame_width > terminal_width) {
-	//						int resized_terminal_height = (int) floor(((float) terminal_width / frame_width) * frame_height);
-
-	//						struct SwsContext *sws_ctx = sws_getContext(frame_width,frame_height,frame->format,terminal_width,resized_terminal_height,frame->format,SWS_FAST_BILINEAR, NULL, NULL, NULL);
-	//						AVFrame *resized_Frame = av_frame_alloc();
-	//						resized_Frame->format = frame->format;
-	//						resized_Frame->width = terminal_width;
-	//						resized_Frame->height = resized_terminal_height;
-	//						av_frame_get_buffer(resized_Frame,32);
-	//						sws_scale(sws_ctx, (const uint8_t *const *)resized_Frame->data,resized_Frame->linesize,0,frame->height,resized_Frame->data,resized_Frame->linesize);
-
-	//						printf("(PASS 2) %dx%d\n", resized_Frame->height, resized_Frame->width);
-	//				sws_freeContext(sws_ctx);
-	//				av_frame_free(&resized_Frame);
-	//						
-	//					
-	//					}
-					
-					
-
-					//sws_freeContext(sws_ctx);
-					//av_frame_free(&resized_Frame);
 					}
 
 
