@@ -1,4 +1,5 @@
 #include <libavutil/mem.h> 
+#include <stdlib.h>
 #include <string.h>
 #include <strings.h>
 #include <libswscale/swscale.h>
@@ -21,16 +22,17 @@ int main(int argc, char *argv[]) {
 	
 	// different character sets
 	 char *charset;
-	 char *charset0 = " ";
-	 char *charset1 = "`^\",:;Il!i~+_-?][}(1)(|\\/tfjrxnuvczXYUJCL";
-	 char *charset2 = " `^\",:;Il!i~+_-?][}(1)(|\\/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao#MW&8%B@S";
-	 char *charset3 = " `^\",:;Il!i~+_-?][}(1)(|\\/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao#MW&8%B@S";
-	 char *charset4 = "  `^\",:;Il!i~+_-?][}(1)(|\\/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao#MW&8%B@S";
-	 char *charset5 = "    `^\",:;Il!i~+_-?][}(1)(|\\/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao#MW&8%B@S";
-	 char *charset6 = "         `^\",:;Il!i~+_-?][}(1)(|\\/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao#MW&8%B@S";
-	 char *charset7 = "                   `^\",:;Il!i~+_-?][}(1)(|\\/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao#MW&8%B@S";
-	 char *charset8 = "                                       `^\",:;Il!i~+_-?][}(1)(|\\/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao#MW&8%B@S";
-	 char *charset9 = "                                                                   `^\",:;Il!i~+_-?][}(1)(|\\/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao#MW&8%B@S";
+	 char *charset0 = "`^\",:;Il!i~+_-?][}(1)(|\\/tfjrxnuvczXYUJCL";
+	 char *charset1 = " `^\",:;Il!i~+_-?][}(1)(|\\/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao#MW&8%B@S";
+	 char *charset2 = "     `^\",:;Il!i~+_-?][}(1)(|\\/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao#MW&8%B@S";
+	 char *charset3 = "          `^\",:;Il!i~+_-?][}(1)(|\\/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao#MW&8%B@S";
+	 char *charset4 = "               `^\",:;Il!i~+_-?][}(1)(|\\/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao#MW&8%B@S";
+	 char *charset5 = "                      `^\",:;Il!i~+_-?][}(1)(|\\/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao#MW&8%B@S";
+	 char *charset6 = "                                `^\",:;Il!i~+_-?][}(1)(|\\/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao#MW&8%B@S";
+	 char *charset7 = "                                                         `^\",:;Il!i~+_-?][}(1)(|\\/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao#MW&8%B@S";
+	 char *charset8 = "                                                                                 `^\",:;Il!i~+_-?][}(1)(|\\/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao#MW&8%B@S";
+	 char *charset9 = " ";
+
 	 const char chars_array_blank[] = " ";
 
 	 switch (atoi(argv[2])) {
@@ -63,6 +65,9 @@ int main(int argc, char *argv[]) {
 			break;
 		case 9:
 			charset = charset9;
+			break;
+		case -1:
+			charset = charset0;
 			break;
 	 }
 
@@ -106,6 +111,9 @@ int main(int argc, char *argv[]) {
 		int frame_width;
 		int frame_height;
 
+		size_t frame_character_buffer_size=terminal_height * terminal_width * 12;
+		char *frame_character_buffer = malloc(frame_character_buffer_size);
+		char *ptr = frame_character_buffer;
 
 	// frame  -> ascii
 	while (av_read_frame(fmt_ctx, packet) >= 0) {
@@ -142,6 +150,8 @@ int main(int argc, char *argv[]) {
 								uint8_t *data = resized_Frame->data[0];
 								int linesize = resized_Frame->linesize[0];
 
+										ptr = frame_character_buffer;
+
 								for (int z = 0; z < resized_Frame->height; z++) {
 									uint8_t *row = data + z * linesize;
 									for (int x = 0; x < resized_Frame->width; x++) {
@@ -150,16 +160,23 @@ int main(int argc, char *argv[]) {
 										uint8_t b = row[x * 3 + 2];
 										int average_brightness = (float) (r + g + b) / 3;
 										int character_index =  round((float)((float)average_brightness / 256.0) * (strlen(charset) -1));
-										printf("\033[48;2;%d;%d;%dm%c\033[0m",r,g,b,charset[character_index]);
+										if (atoi(argv[2]) == -1) {
+											ptr += sprintf(ptr, "%c", charset[character_index]);
+										} else {
+											ptr += sprintf(ptr, "\033[48;2;%d;%d;%dm%c\033[0m",r,g,b,charset[character_index]);
+										}
 								}
-									printf("\n"); // new line of the frame
+									*ptr++='\n'; // new line of the frame
 
 						}
+								*ptr = '\0';
+								printf("%s", frame_character_buffer);
+								fflush(stdout);
 									printf("\033[H"); // new frame
 						
 							sws_freeContext(sws_ctx);
 							av_frame_free(&resized_Frame);
-					}
+						}
 
 
 				
