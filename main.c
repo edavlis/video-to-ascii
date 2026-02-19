@@ -1,4 +1,5 @@
-#include <libavutil/mem.h> #include <stdlib.h>
+#include <libavutil/mem.h>
+#include <stdlib.h>
 #include <string.h>
 #include <strings.h>
 #include <libswscale/swscale.h>
