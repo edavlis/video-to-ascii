@@ -1,5 +1,4 @@
-#include <libavutil/mem.h> 
-#include <stdlib.h>
+#include <libavutil/mem.h> #include <stdlib.h>
 #include <string.h>
 #include <strings.h>
 #include <libswscale/swscale.h>
@@ -22,23 +21,22 @@ int main(int argc, char *argv[]) {
 	
 	// different character sets
 	 char *charset;
-	 char *charset0 = "`^\",:;Il!i~+_-?][}(1)(|\\/tfjrxnuvczXYUJCL";
-	 char *charset1 = " `^\",:;Il!i~+_-?][}(1)(|\\/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao#MW&8%B@S";
-	 char *charset2 = "     `^\",:;Il!i~+_-?][}(1)(|\\/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao#MW&8%B@S";
-	 char *charset3 = "          `^\",:;Il!i~+_-?][}(1)(|\\/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao#MW&8%B@S";
-	 char *charset4 = "               `^\",:;Il!i~+_-?][}(1)(|\\/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao#MW&8%B@S";
+	 char *charset1 = "`^\",:;Il!i~+_-?][}(1)(|\\/tfjrxnuvczXYUJCL";
+	 char *charset2 = " `^\",:;Il!i~+_-?][}(1)(|\\/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao#MW&8%B@S";
+	 char *charset3 = "     `^\",:;Il!i~+_-?][}(1)(|\\/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao#MW&8%B@S";
+	 char *charset4 = "          `^\",:;Il!i~+_-?][}(1)(|\\/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao#MW&8%B@S";
 	 char *charset5 = "                      `^\",:;Il!i~+_-?][}(1)(|\\/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao#MW&8%B@S";
 	 char *charset6 = "                                `^\",:;Il!i~+_-?][}(1)(|\\/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao#MW&8%B@S";
 	 char *charset7 = "                                                         `^\",:;Il!i~+_-?][}(1)(|\\/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao#MW&8%B@S";
 	 char *charset8 = "                                                                                 `^\",:;Il!i~+_-?][}(1)(|\\/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao#MW&8%B@S";
-	 char *charset9 = " ";
+	 char *charset9 = "                                                                                            ";
+	 int charset_length = strlen(charset) -1;
+	 int ascii_factor = atoi(argv[2]);
+		 
 
 	 const char chars_array_blank[] = " ";
 
-	 switch (atoi(argv[2])) {
-		case 0:
-			charset = charset0;
-			break;
+	 switch (abs(atoi(argv[2]))) {
 		case 1:
 			charset = charset1;
 			break;
@@ -65,9 +63,6 @@ int main(int argc, char *argv[]) {
 			break;
 		case 9:
 			charset = charset9;
-			break;
-		case -1:
-			charset = charset0;
 			break;
 	 }
 
@@ -129,7 +124,6 @@ int main(int argc, char *argv[]) {
 						ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
 						int terminal_height = w.ws_row - 1;
 						int terminal_width = w.ws_col;
-						
 						// if frame is too tall resize
 						if (frame_height > terminal_height ) {
 							
@@ -141,9 +135,6 @@ int main(int argc, char *argv[]) {
 							resized_Frame->width = resized_terminal_width;
 							av_frame_get_buffer(resized_Frame,32);
 							sws_scale(sws_ctx, (const uint8_t *const *)frame->data,frame->linesize,0,frame_height,resized_Frame->data,resized_Frame->linesize);
-
-//							printf("Decoded format: %s\n", av_get_pix_fmt_name(frame->format));
-//							printf("(PASS 1) %dx%d\n",  resized_Frame->width,resized_Frame->height);
 
 							// magically read RGB values or wtvr
 
@@ -159,20 +150,22 @@ int main(int argc, char *argv[]) {
 										uint8_t g = row[x * 3 + 1];
 										uint8_t b = row[x * 3 + 2];
 										int average_brightness = (float) (r + g + b) / 3;
-										int character_index =  round((float)((float)average_brightness / 256.0) * (strlen(charset) -1));
-										if (atoi(argv[2]) == -1) {
-											ptr += sprintf(ptr, "%c", charset[character_index]);
+										int character_index =  round((float)((float)average_brightness / 256.0) * (charset_length));
+										if (ascii_factor < 0) {
+											*ptr++ = charset[character_index];
 										} else {
-											ptr += sprintf(ptr, "\033[48;2;%d;%d;%dm%c\033[0m",r,g,b,charset[character_index]);
+											ptr += sprintf(ptr, "\033[48;2;%d;%d;%dm%c",r,g,b,charset[character_index]);
 										}
 								}
+									 ptr += sprintf(ptr, "\033[0m");
 									*ptr++='\n'; // new line of the frame
 
 						}
 								*ptr = '\0';
-								printf("%s", frame_character_buffer);
+								write(STDOUT_FILENO, frame_character_buffer,ptr - frame_character_buffer);
 								fflush(stdout);
-									printf("\033[H"); // new frame
+								   // fputs("\033[A\033[2K\033[A\033[2K",stdout);
+								printf("\033[H"); // new frame
 						
 							sws_freeContext(sws_ctx);
 							av_frame_free(&resized_Frame);
