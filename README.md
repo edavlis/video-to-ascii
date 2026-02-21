@@ -14,7 +14,7 @@ Simple video to ascii player, written in C
         negtive text factors will play the video without colour
 
 Original video
-![Original Video](./assets/example-normal-video.webm)
+![Original Video](./assets/wake-the-fuck-up.gif)
 
 Ascii video (watch in fullscreen to see text)
-![Ascii video](./assets/example-ascii-video.mp4)
+![Ascii video](./assets/we-got-a-city-to-burn.mp4)
