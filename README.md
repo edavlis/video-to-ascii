@@ -14,7 +14,16 @@ Simple video to ascii player, written in C
         negtive text factors will play the video without colour
 
 Original video
+
 ![Original Video](./assets/wake-the-fuck-up.gif)
 
+
 Ascii video (watch in fullscreen to see text)
-![Ascii video](./assets/we-got-a-city-to-burn.mp4)
+
+![Ascii video](./assets/we-got-a-city-to-burn.gif)
+
+
+Works best if your terminal emulator is fast (eg alacritty)
+
+    Known issues:
+        Text being the wrong colour    
