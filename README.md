@@ -18,7 +18,7 @@ Original video
 ![Original Video](./assets/wake-the-fuck-up.gif)
 
 
-Ascii video (watch in fullscreen to see text)
+Ascii video with colour
 
 ![Ascii video](./assets/we-got-a-city-to-burn.gif)
 
@@ -26,4 +26,6 @@ Ascii video (watch in fullscreen to see text)
 Works best if your terminal emulator is fast (eg alacritty)
 
     Known issues:
-        Text being the wrong colour    
+        Text being the wrong in colour in kitty terminal 
+
+Personal project to learn ffmpeg's libav

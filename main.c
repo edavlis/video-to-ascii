@@ -1,13 +1,13 @@
 #include <asm-generic/errno-base.h>
 #include <bits/time.h>
-#include <libavcodec/avcodec.h> // For AVCodecContext, decoding
+#include <libavcodec/avcodec.h>
 #include <libavcodec/codec.h>
 #include <libavcodec/packet.h>
-#include <libavformat/avformat.h> // For AVFormatContext, opening files
+#include <libavformat/avformat.h>
 #include <libavutil/avutil.h>
 #include <libavutil/error.h>
 #include <libavutil/frame.h>
-#include <libavutil/imgutils.h> // For image utilities (allocations, etc)
+#include <libavutil/imgutils.h>
 #include <libavutil/mem.h>
 #include <libswscale/swscale.h>
 #include <libswscale/version.h>
@@ -38,10 +38,14 @@ void sleep_ms(long milliseconds) {
 
 int main(int argc, char *argv[]) {
 
-	if (argc != 3) {
-		printf("\nUsage:\n\t./video-to-ascii <path to video> <text factor>\n\t\tText factor controls how much text there will be in the video, ranges from -9 to -1 and 1 to 9\n\t\t-9 and 9 will yeild more text, 1 and -1 will show less text.\n\t\tNegative values will remove colour\n");
-		return -1;
-	}
+  if (argc != 3) {
+    printf(
+        "\nUsage:\n\t./video-to-ascii <path to video> <text factor>\n\t\tText "
+        "factor controls how much text there will be in the video, ranges from "
+        "-9 to -1 and 1 to 9\n\t\t-9 and 9 will yeild more text, 1 and -1 will "
+        "show less text.\n\t\tNegative values will remove colour\n");
+    return -1;
+  }
 
   // different character sets
   char *charset;
@@ -185,7 +189,7 @@ int main(int argc, char *argv[]) {
   int frame_height;
   size_t frame_character_buffer_size =
       7680 * 4320 *
-      14; // worst case, some idiot with a 7680 x 4320 character terminal
+      14; // worst case, someone with a 7680 x 4320 character terminal
   char *frame_character_buffer = malloc(frame_character_buffer_size);
   if (frame_character_buffer == NULL) {
     fprintf(stderr, "Could not allocate frame character buffer\n");
@@ -279,9 +283,8 @@ int main(int argc, char *argv[]) {
 
           ptr = frame_character_buffer;
 
-				printf("\033[H");
-				fflush(stdout);
-					
+          printf("\033[H");
+          fflush(stdout);
 
           for (int z = 0; z < resized_Frame->height; z++) {
             uint8_t *row = data + z * linesize;
@@ -311,18 +314,19 @@ int main(int argc, char *argv[]) {
             *ptr++ = '\n';
           }
           *ptr = '\0';
-          write(STDOUT_FILENO, frame_character_buffer, ptr - frame_character_buffer);
-					fflush(stdout);
+          write(STDOUT_FILENO, frame_character_buffer,
+                ptr - frame_character_buffer);
+          fflush(stdout);
           long end_time = current_time_milliseconds();
           if ((end_time - start_time) < milliseconds_per_frame) {
             sleep_ms(milliseconds_per_frame - (end_time - start_time));
           }
           if (first_frame_clear == 0) {
-          	printf("\033[H");
+            printf("\033[H");
             printf("\e[1;1H\e[2J");
             first_frame_clear++;
-          }         
-				}
+          }
+        }
       }
     }
     av_packet_unref(packet);
