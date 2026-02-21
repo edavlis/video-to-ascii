@@ -38,6 +38,11 @@ void sleep_ms(long milliseconds) {
 
 int main(int argc, char *argv[]) {
 
+	if (argc != 3) {
+		printf("\nUsage:\n\t./video-to-ascii <path to video> <text factor>\n\t\tText factor controls how much text there will be in the video, ranges from -9 to -1 and 1 to 9\n\t\t-9 and 9 will yeild more text, 1 and -1 will show less text.\n\t\tNegative values will remove colour\n");
+		return -1;
+	}
+
   // different character sets
   char *charset;
   char *charset1 = "`^\",:;Il!i~+_-?][}(1)(|\\/tfjrxnuvczXYUJCL";
@@ -180,7 +185,7 @@ int main(int argc, char *argv[]) {
   int frame_height;
   size_t frame_character_buffer_size =
       7680 * 4320 *
-      24; // worst case, some idiot with a 7680 x 4320 character terminal
+      14; // worst case, some idiot with a 7680 x 4320 character terminal
   char *frame_character_buffer = malloc(frame_character_buffer_size);
   if (frame_character_buffer == NULL) {
     fprintf(stderr, "Could not allocate frame character buffer\n");
@@ -274,6 +279,10 @@ int main(int argc, char *argv[]) {
 
           ptr = frame_character_buffer;
 
+				printf("\033[H");
+				fflush(stdout);
+					
+
           for (int z = 0; z < resized_Frame->height; z++) {
             uint8_t *row = data + z * linesize;
             for (int x = 0; x < resized_Frame->width; x++) {
@@ -302,19 +311,18 @@ int main(int argc, char *argv[]) {
             *ptr++ = '\n';
           }
           *ptr = '\0';
-          write(STDOUT_FILENO, frame_character_buffer,
-                ptr - frame_character_buffer);
-          fflush(stdout);
+          write(STDOUT_FILENO, frame_character_buffer, ptr - frame_character_buffer);
+					fflush(stdout);
           long end_time = current_time_milliseconds();
           if ((end_time - start_time) < milliseconds_per_frame) {
             sleep_ms(milliseconds_per_frame - (end_time - start_time));
           }
-          printf("\033[H");
           if (first_frame_clear == 0) {
+          	printf("\033[H");
             printf("\e[1;1H\e[2J");
             first_frame_clear++;
-          }
-        }
+          }         
+				}
       }
     }
     av_packet_unref(packet);
