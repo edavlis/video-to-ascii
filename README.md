@@ -1,3 +1,5 @@
+inpired by this [tweet](https://x.com/gen_intuition/status/1978823244338659498)
+
 Simple video to ascii player, written in C
 
     Requirements:
